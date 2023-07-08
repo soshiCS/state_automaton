@@ -5,12 +5,7 @@ digraph finite_state_machine {
 	rankdir=LR;
 	node [shape = doublecircle]; 1000 ; 
 	node [shape = circle];
-	2 -> 3 [label = "T"];
-	3 -> 3 [label = "T"];
-	5 -> 1000 [label = "EOF"];
-	4 -> 3 [label = "E"];
-	4 -> 5 [label = "0"];
-	4 -> 4 [label = "T"];
+	2 -> 1000 [label = "EOF"];
 	0 -> 1 [label = "E"];
 	1 -> 2 [label = "0"];
 	1 -> 1 [label = "T"];

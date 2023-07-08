@@ -36,6 +36,12 @@ let _unary_operation (op : _unary) : int =
 
 let rec evaluate_expression expression hash_map minimal =
   let hashmap_length = Hashtbl.length hash_map in
+  let _replace_values hashmap currentVal replaceVal =
+  Hashtbl.iter (fun key value ->
+    if value = currentVal then
+      Hashtbl.replace hashmap key replaceVal
+  ) hashmap
+  in
   match expression with
   | CompileUnit exps ->
     let _evaluated_exps = List.map (fun exp -> evaluate_expression exp hash_map minimal) exps in
@@ -46,19 +52,27 @@ if minimal then (
    (*Hashtbl.add hash_map hashmap_length transition;*)
                    let key_exists1 = Hashtbl.mem hash_map (hashmap_length - 1) in
       if key_exists1 then (
+              let _transit = Hashtbl.find hash_map ( hashmap_length - 1 )in
+              Hashtbl.remove hash_map ( hashmap_length - 1 );
+             let _hash = Hashtbl.find hash_map ( hashmap_length - 2 ) in
              let _evaluated_exps = List.map (fun exp -> evaluate_expression exp hash_map minimal) exps in
                 let _hash_length = Hashtbl.length hash_map in
-              let tran= Hashtbl.find hash_map ( _hash_length - (1  +  (_hash_length - hashmap_length)))in
+                Hashtbl.add hash_map _hash_length _transit;
+               (* _replace_values _hash (hashmap_length - 1) _hash_length;*)
+                (*let tran= Hashtbl.find hash_map ( _hash_length - (1  +  (_hash_length - hashmap_length)))in*)
                let _tran2= Hashtbl.find hash_map ( _hash_length - 1    )in
-               if (hashmap_length + 1) = _hash_length then (
-                List.iter (fun s -> add tran s (hashmap_length - 1 )) strings;
+               if hashmap_length = _hash_length then (
+                List.iter (fun s -> add _tran2 s (hashmap_length - 1 )) strings;
+                Hashtbl.add _tran2 "E" (hashmap_length  ) ;
                ) else 
                     (
-                List.iter (fun s -> add tran s (hashmap_length )) strings;
+                            _replace_values _hash (hashmap_length - 1) (_hash_length - 1);
+                List.iter (fun s -> add _tran2 s (hashmap_length - 1 )) strings;
+                 Hashtbl.add _tran2 "E" (_hash_length  ) ;
                );
               (*  List.iter (fun s -> add tran s (hashmap_length - 1 )) strings;*)
 (*Hashtbl.remove tran "E" ;         *)   
-   Hashtbl.add _tran2 "E" (hashmap_length - 1  ) ;
+   (*Hashtbl.add _tran2 "E" (hashmap_length  ) ;*)
     print_string "oooo";
                )
               else (
@@ -173,6 +187,7 @@ If (strings, exps, _else)
     if minimal then (
             Hashtbl.remove hash_map (hashmap_length - 1 ) ;
             let tran2 = Hashtbl.find hash_map (hashmap_length - 2 )in
+            Hashtbl.remove tran2 "E";
     List.iter (fun s -> Hashtbl.add tran2 s (hashmap_length - 1 )) strings;
         
     )
@@ -207,11 +222,11 @@ if hash_len = 0 then (
 ;;
 
 let my_nfa = create 10
-let _expression1 = CompileUnit [Read; While (["T"], [Read]); Ensure ["0"]; Read;  While (["T"], [Read ;  While (["T"], [Read]);While (["T"], [Read]) ]) ; Ensure ["0"];Read ;Return ["EOF"]]
-let _expression2 = CompileUnit [Read; If (["T"], [Read], []); Ensure ["0"]; Read; Return ["EOF"]]
+let _expression1 = CompileUnit [Read; While (["T"], [Read]); Ensure ["0"]; Read;  While (["T"], [Read ;  While (["T"], [Read]) ; While (["T"], [Read; While (["T"], [Read])]); While (["T"], [Read]) ]) ; Ensure ["0"];Read ;Return ["EOF"]]
+let _expression2 = CompileUnit [Read; While (["T"], [Read]); Ensure ["0"]; Read; Return ["EOF"]]
 let _tm_exp = CompileUnit [For ("i", Greater (1, 2), Inc 1, [])]
 
-let _result = evaluate_expression _expression1 my_nfa true
+let _result = evaluate_expression _expression2 my_nfa true
 
 let concatenate_nested_hashmap hashmap =
   let concatenated_string = ref "digraph finite_state_machine {\n" in
